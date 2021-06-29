@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <form action="/signup" method="post">
+      <label>ユーザ名</label>
+      <!-- required 入力必須 -->
+      <input required type="text" name="username" />
+      <br />
+      <label>パスワード</label>
+      <input type="text" name="password" />
+      <br />
+      <label>パスワード再入力</label>
+      <input type="text" name="repassword" />
+      <br />
+      <input type="submit" value="Sign Up" />
+    </form>
+  </body>
+</html>
