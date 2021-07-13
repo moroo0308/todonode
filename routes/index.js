@@ -11,8 +11,15 @@ const connection = mysql.createConnection({
 });
 
 
-/* ルーティング実行. */
+/**
+ * タスク取得
+ * ルーティング実行
+ */
 router.get('/', function (req, res, next) {
+  const userid = req.session.userid;
+  // 値が空の場合falseを返す。
+  const isAuth = Boolean(userid);
+
   knex("tasks")
     .select("*")
     .then(function (results) {
@@ -20,11 +27,29 @@ router.get('/', function (req, res, next) {
       res.render('index', {
         title: 'Todo App',
         todos: results,
+        isAuth: isAuth,
+      });
+    })
+    .catch(function (err) {
+      console.log(err);
+      res.render('index', {
+        title: 'Todo App',
+        isAuth: isAuth,
       });
     });
 });
 
+/**
+ * タスク登録
+ */
 router.post('/', function (req, res, next) {
+
+  const userid = req.session.userid;
+  // 値が空の場合falseを返す。
+  const isAuth = Boolean(userid);
+  // index.ejsのreq.body.<input>要素のname値
+  const todo = req.body.add;
+
   connection.connect((err) => {
     if (err) {
       console.log('error connecting: ' + err.stack);
@@ -33,19 +58,23 @@ router.post('/', function (req, res, next) {
     console.log('success');
   });
 
-  // index.ejsのreq.body.<input>要素のname値
-  const todo = req.body.add;
   knex("tasks")
-    .insert({ user_id: 1, content: todo })
+    .insert({ user_id: userid, content: todo })
     .then(function () {
       // ルートパスに対してGETリクエストする
       res.redirect('/');
     })
     .catch(function (err) {
       console.log(err);
+      res.render('index', {
+        title: 'Todo App',
+        isAuth: isAuth,
+      });
     });
 });
 
 router.use('/signup', require('./signup'));
+router.use('/signin', require('./signin'));
+router.use('/logout', require('./logout'));
 
 module.exports = router;
