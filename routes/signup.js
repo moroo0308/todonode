@@ -1,6 +1,7 @@
 const express = require('express');
 const knex = require('../db/knex');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 
 router.get('/', function (req, res, next) {
   const userId = req.session.userid;
@@ -21,7 +22,7 @@ router.post('/', function (req, res, next) {
   knex("users")
     .where({ name: username })
     .select("*")
-    .then(function (result) {
+    .then(async function (result) {
       // 入力したユーザ名が既に存在する場合
       if (result.length !== 0) {
         res.render("signup", {
@@ -31,8 +32,12 @@ router.post('/', function (req, res, next) {
         });
         // 入力したパスワードと再入力したパスワードが正しい場合
       } else if (password === repassword) {
+        // 10はハッシュ化する回数(一般的には10を指定する)
+        const hashedPassword = await bcrypt.hash(password, 10);
+        console.log("hashedPassword：");
+        console.log(hashedPassword);
         knex("users")
-          .insert({ name: username, password: password })
+          .insert({ name: username, password: hashedPassword })
           .then(function () {
             res.redirect("/");
           })

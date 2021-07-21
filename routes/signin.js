@@ -1,6 +1,7 @@
 const express = require("express");
 const knex = require("../db/knex");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 
 router.get('/', function (req, res, next) {
   const userId = req.session.userid;
@@ -20,10 +21,9 @@ router.post('/', function (req, res, next) {
   knex("users")
     .where({
       name: username,
-      password: password,
     })
     .select("*")
-    .then((results) => {
+    .then(async (results) => {
       // usersテーブルに入力した会員がない場合、ユーザ無いエラーメッセージを出力する。
       if (results.length === 0) {
         res.render("signin", {
@@ -31,12 +31,17 @@ router.post('/', function (req, res, next) {
           errorMessage: ["ユーザが見つかりません"],
           isAuth: isAuth,
         });
-      } else {
+      } else if(await bcrypt.compare(password, results[0].password)){
         // usersテーブルのidカラムのデータをセッションに保存
         req.session.userid = results[0].id;
-        req.session.username = results[0].username;
         // トップページに遷移する。
         res.redirect('/');
+      } else {
+        res.render("signin", {
+          title: "Signin",
+          errorMessage: ["ユーザが見つかりません"],
+          isAuth: isAuth,
+        });
       }
     });
 });
