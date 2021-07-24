@@ -6,8 +6,8 @@ const passport = require("passport");
  * サインイン画面に遷移
  */
 router.get('/', function (req, res, next) {
-  const userId = req.session.userid;
-  const isAuth = Boolean(userId);
+  // passport認証を通過(サインイン)している場合、trueを返す。
+  const isAuth = req.isAuthenticated();
   res.render('signin', {
     title: 'Sign in',
     isAuth: isAuth,

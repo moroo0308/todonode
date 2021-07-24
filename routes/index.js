@@ -16,9 +16,9 @@ const connection = mysql.createConnection({
  * ルーティング実行
  */
 router.get('/', function (req, res, next) {
-  const userid = req.session.userid;
-  // 値が空の場合falseを返す。
-  const isAuth = Boolean(userid);
+  
+  // passport認証を通過(サインイン)している場合、trueを返す。
+  const isAuth = req.isAuthenticated();
 
   knex("tasks")
     .select("*")
@@ -44,9 +44,8 @@ router.get('/', function (req, res, next) {
  */
 router.post('/', function (req, res, next) {
 
-  const userid = req.session.userid;
-  // 値が空の場合falseを返す。
-  const isAuth = Boolean(userid);
+  // passport認証を通過(サインイン)している場合、trueを返す。
+  const isAuth = req.isAuthenticated();
   // index.ejsのreq.body.<input>要素のname値
   const todo = req.body.add;
 
