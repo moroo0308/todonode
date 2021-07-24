@@ -1,8 +1,10 @@
 const express = require("express");
-const knex = require("../db/knex");
 const router = express.Router();
-const bcrypt = require("bcrypt");
+const passport = require("passport");
 
+/**
+ * サインイン画面に遷移
+ */
 router.get('/', function (req, res, next) {
   const userId = req.session.userid;
   const isAuth = Boolean(userId);
@@ -12,38 +14,19 @@ router.get('/', function (req, res, next) {
   });
 });
 
-router.post('/', function (req, res, next) {
-  const username = req.body.username;
-  const password = req.body.password;
-  const userId = req.session.userid;
-  const isAuth = Boolean(userId);
-
-  knex("users")
-    .where({
-      name: username,
-    })
-    .select("*")
-    .then(async (results) => {
-      // usersテーブルに入力した会員がない場合、ユーザ無いエラーメッセージを出力する。
-      if (results.length === 0) {
-        res.render("signin", {
-          title: "Signin",
-          errorMessage: ["ユーザが見つかりません"],
-          isAuth: isAuth,
-        });
-      } else if(await bcrypt.compare(password, results[0].password)){
-        // usersテーブルのidカラムのデータをセッションに保存
-        req.session.userid = results[0].id;
-        // トップページに遷移する。
-        res.redirect('/');
-      } else {
-        res.render("signin", {
-          title: "Signin",
-          errorMessage: ["ユーザが見つかりません"],
-          isAuth: isAuth,
-        });
-      }
-    });
-});
+/**
+ * passport認証の認証処理
+ * passport.authenticate
+ * ・第一引数 使用するストラテジーの指定
+ */
+router.post('/', passport.authenticate('local', {
+  // 認証成功時のリダイレクト先
+  successRedirect: '/',
+  // 認証失敗時のリダイレクト先
+  failureRedirect: '/signin',
+  // 認証時に発生したエラーメッセージを利用
+  failureFlash: false,
+})
+);
 
 module.exports = router;

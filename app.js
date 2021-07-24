@@ -3,21 +3,8 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const cookieSession = require('cookie-session');
-const secret = "secretCuisine123";
 
 const app = express();
-
-app.use(
-  cookieSession({
-    // cookie名
-    name: "session",
-    // cookieに格納するデータを暗号化するための文字列(キー)の指定。
-    keys: [secret],
-    // cookieの有効期限
-    maxAge: 24 * 60 * 60 * 1000, // 24h
-  })
-);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,6 +15,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// authorization
+require("./config/passport.js")(app);
 
 // ルーティング indexファイルはフォルダ指定だけで読み込まれる
 app.use('/', require('./routes'));
