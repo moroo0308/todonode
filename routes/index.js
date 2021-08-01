@@ -3,6 +3,8 @@ const router = express.Router();
 const knex = require("../db/knex");
 const mysql = require('mysql');
 
+const titleName = 'Todo App';
+
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -16,27 +18,36 @@ const connection = mysql.createConnection({
  * ルーティング実行
  */
 router.get('/', function (req, res, next) {
-  
+
   // passport認証を通過(サインイン)している場合、trueを返す。
   const isAuth = req.isAuthenticated();
+  if (isAuth) {
+    const userid = req.user.id;
 
-  knex("tasks")
-    .select("*")
-    .then(function (results) {
-      console.log(results);
-      res.render('index', {
-        title: 'Todo App',
-        todos: results,
-        isAuth: isAuth,
+    knex("tasks")
+      .select("*")
+      .where({ user_id: userid })
+      .then(function (results) {
+        console.log(results);
+        res.render('index', {
+          title: titleName,
+          todos: results,
+          isAuth: isAuth,
+        });
+      })
+      .catch(function (err) {
+        console.log(err);
+        res.render('index', {
+          title: titleName,
+          isAuth: isAuth,
+        });
       });
-    })
-    .catch(function (err) {
-      console.log(err);
-      res.render('index', {
-        title: 'Todo App',
-        isAuth: isAuth,
-      });
+  } else {
+    res.render('index',{
+      title: titleName,
+      isAuth: isAuth,
     });
+  }
 });
 
 /**
@@ -46,6 +57,8 @@ router.post('/', function (req, res, next) {
 
   // passport認証を通過(サインイン)している場合、trueを返す。
   const isAuth = req.isAuthenticated();
+  // ユーザーID取得
+  const userid = req.user.id;
   // index.ejsのreq.body.<input>要素のname値
   const todo = req.body.add;
 
@@ -66,7 +79,7 @@ router.post('/', function (req, res, next) {
     .catch(function (err) {
       console.log(err);
       res.render('index', {
-        title: 'Todo App',
+        title: titleName,
         isAuth: isAuth,
       });
     });
